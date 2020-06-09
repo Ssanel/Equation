@@ -1,0 +1,219 @@
+clc;
+clear all
+format longG
+eps = 10^(-6);
+e=2.718;
+% функция
+f= @(x)e.^(x)-acos(sqrt(x));
+
+%%% МЕТОД БИСЕКЦИЙ %%%
+% график функции
+plot(1:0.01:10, f(1:0.01:10), 'LineWidth', 3, 'Color', 'm');
+hold on
+grid on
+axis square
+% возьмем сильно локализованный отрезок
+a = 0; b = 1;
+k1 = 0;
+
+while (b-a)/2 >= eps 
+% приближенное значение корня
+x01 = (a + b)/2;
+% выбираем половину
+if f(x01)*f(a)<0
+b = x01;
+elseif f(x01)*f(b)<0
+a = x01;
+else
+a = x01;
+b = x01;
+end
+k1 = k1 + 1;
+end
+
+disp ('1. Bisection');
+disp (['Approximate root value: ', num2str(x01)]);
+disp (['Number of iterations: ', num2str(k1)]);
+
+%%% МЕТОД ПРОСТЫХ ИТЕРАЦИЙ %%%
+a = 0; b = 1;
+
+x0= 1;
+
+f= @(x)e^x-acos(sqrt(x));
+
+df = @(x) e^x+1./(2*sqrt(1-x)*sqrt(x));
+
+q = 1/df(b);
+
+x1 = x0 - q*f(x0);
+
+k2 = 0; % кол-во итераций
+
+while abs(x0-x1) >= eps
+
+k2= k2+1;
+
+x0 = x1;
+
+x1 = x0 - q*f(x0);
+
+end
+
+disp ('2)МЕТОД ПРОСТЫХ ИТЕРАЦИЙ');
+
+disp (['Приближенное значение корня: ', num2str(x0)]);
+
+disp (['Количество итераций: ', num2str(k2)]);
+
+%%% МЕТОД НЬЮТОНА %%%
+
+df = @(x)  e^x+1./(2*sqrt(1-x)*sqrt(x));
+
+d2f = @(x) -1./(4*sqrt(1-x)*x^(3/2))+e^x+1./(4*(1-x)^(3/2)*sqrt(x));
+
+m1 = abs(df(fminbnd(@(x)abs(df(x)), a, b)));
+
+M2 = abs(d2f(fminbnd(@(x)abs(d2f(x)), a, b)));
+
+e = sqrt((2*m1*eps)/M2);
+
+epsilon2 = 1;
+
+x03 = a;
+
+k3 = 0; % кол-во итераций
+
+while epsilon2 >= e
+
+k3 = k3+1;
+
+% работа алгоритма
+
+x1 = x03 - f(x03)/df(x03);
+
+epsilon2 = abs(f(x03)-f(x1));
+
+x03 = x1;
+
+end
+
+disp ('3)МЕТОД НЬЮТОНА');
+
+disp (['Приближенное значение корня: ', num2str(x03)]);
+
+disp (['Количество итераций: ', num2str(k3)]);
+
+%%% МЕТОД ХОРД %%%
+
+a = 1; b = 2;
+
+x0= a;
+
+x1 = b;
+
+f= @(x)e^x-acos(sqrt(x));
+
+k4 = 0; % кол-во итераций
+
+while (abs(x0 - x1) > eps)
+
+x = x1;
+
+x1 = x0 - f(x0)*(x1 - x0) ./ (f(x1) - f(x0));
+
+x0 = x;
+
+k4 = k4+1;
+
+end
+
+disp ('4)МЕТОД ХОРД');
+
+disp (['Приближенное значение корня: ', num2str(x0)]);
+
+disp (['Количество итераций: ', num2str(k4)]);
+
+%%% КОМБИНИРОВАННЫЙ %%%
+
+a = 1;
+
+b = 2;
+
+a5 = a;
+
+b5 = b;
+
+eps = 10^(-6);
+
+k5=0;
+
+f= @(x)e^x-acos(sqrt(x));
+
+df = @(x)  e^x+1./(2*sqrt(1-x)*sqrt(x));
+
+d2f = @(x)-1./(4*sqrt(1-x)*x^(3/2))+e^x+1./(4*(1-x)^(3/2)*sqrt(x));
+
+while (abs(b5 - a5) > eps )
+
+if (f(a5)*d2f(a) < 0)
+
+a5 = a5 - f(a5)*(a5 - b5) / (f(a5) - f(b5));
+
+elseif (f(a5)*d2f(a) > 0)
+
+a5 = a5 - f(a5) / df(a5);
+
+end
+
+if (f(b5)*d2f(b) < 0)
+
+b5 = a5 - f(b5)*(b5 - a5) / (f(b5) - f(a5));
+
+elseif (f(b5)*d2f(b) > 0)
+
+b5 = b5 - f(b5) /df(b5);
+
+end
+
+k5 = k5+1;
+
+end
+
+x0 = (a5 + b5) / 2;
+
+disp ('5)КОМБИНИРОВАННЫЙ');
+
+disp (['Приближенное значение корня: ', num2str(x0)]);
+
+disp (['Количество итераций: ', num2str(k5)]);
+
+u = [k1,k2,k3,k4,k5];
+
+[t,i]=min(u);
+
+disp('САМЫЙ БЫСТРЫЙ МЕТОД:')
+
+switch i
+
+case 1
+
+disp('Бисекция')
+
+case 2
+
+disp('ПРОСТЫЕ ИТЕРАЦИИ')
+
+case 3
+
+disp('НЬЮТОН')
+
+case 4
+
+disp('ХОРД')
+
+case 5
+
+disp('КОМБИНИРОВАННЫЙ')
+
+end
